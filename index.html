@@ -211,6 +211,7 @@ code{background:var(--soft);padding:1px 4px;border-radius:2px}
     <nav class="nav">
       <button id="navPicks">★ <span class="lbl">My Picks</span></button>
       <a id="navVSE" href="https://www.marketwatch.com/games" target="_blank" rel="noopener">↗ <span class="lbl">VSE Game</span></a>
+      <a id="navClub" href="#" target="_blank" rel="noopener" style="display:none">↗ <span class="lbl">Club Page</span></a>
       <button id="navSet" title="Teacher settings">⚙</button>
     </nav>
   </div>
@@ -578,7 +579,7 @@ function viewQuote(){
         <div class="toast" id="toast"></div>
       </section>
 
-      <div class="vse"><span>Ready to trade it with virtual money?</span><a class="btn sm" href="${esc(VSE_URL)}" target="_blank" rel="noopener">Open VSE ↗</a></div>
+      <div class="vse"><span>Ready to trade it with virtual money?</span><a class="btn sm" href="${esc(VSE_URL)}" target="_blank" rel="noopener">Open VSE ↗</a></div>${clubBox()}
 
       <section class="card" style="margin-top:20px">
         <h2 class="sec-h">Company Profile</h2>
@@ -606,6 +607,9 @@ function viewQuote(){
     $('#savePick').textContent='✓ Saved';
   };
 }
+
+function clubURL(){ return (typeof CLUB_SITE_URL!=='undefined' && CLUB_SITE_URL) ? CLUB_SITE_URL : ''; }
+function clubBox(){ const u=clubURL(); return u?`<div class="vse" style="margin-top:8px"><span>Cranbrook Investing Club page</span><a class="btn ghost sm" href="${esc(u)}" target="_blank" rel="noopener">Open Club Page ↗</a></div>`:''; }
 
 /* ---------- ETF PAGE ---------- */
 function feeRead(f){
@@ -715,7 +719,7 @@ function viewEtf(){
         <div class="toast" id="toast"></div>
       </section>
 
-      <div class="vse"><span>Ready to trade it with virtual money?</span><a class="btn sm" href="${esc(VSE_URL)}" target="_blank" rel="noopener">Open VSE ↗</a></div>
+      <div class="vse"><span>Ready to trade it with virtual money?</span><a class="btn sm" href="${esc(VSE_URL)}" target="_blank" rel="noopener">Open VSE ↗</a></div>${clubBox()}
 
       <section class="card" style="margin-top:20px">
         <h2 class="sec-h">What's an ETF?</h2>
@@ -832,6 +836,7 @@ $('#logo').onclick=()=>go('home');
 $('#navPicks').onclick=()=>go('picks');
 $('#navSet').onclick=()=>go('settings');
 $('#navVSE').href=VSE_URL;
+if(clubURL()){ const c=$('#navClub'); c.href=clubURL(); c.style.display=''; }
 wireSearch($('#topSearch'));
 setSub();
 go('home');

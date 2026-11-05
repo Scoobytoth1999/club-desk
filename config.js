@@ -11,6 +11,10 @@ const FINNHUB_KEY = 'd4fj4a9r01qufc4uqkjgd4fj4a9r01qufc4uqkk0';
 // e.g. 'https://www.marketwatch.com/games/your-class-game'
 const VSE_URL = 'https://www.marketwatch.com/games';
 
+// "Club Page" button (top bar and next to the VSE button). Use the PUBLISHED Google Sites
+// address so students can open it. Leave as '' to hide the button.
+const CLUB_SITE_URL = 'https://sites.google.com/u/0/d/1-_A-8NGXAtMMXbHHv2QoQRwVk0dUKWzy/preview';
+
 // Popular stocks shown on the home page and in the top strip: ['TICKER', 'Name']
 const POPULAR = [
   ['AAPL', 'Apple'],
