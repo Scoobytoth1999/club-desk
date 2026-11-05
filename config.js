@@ -26,3 +26,13 @@ const POPULAR = [
   ['F',    'Ford'],
   ['GM',   'General Motors'],
 ];
+
+// Popular ETFs shown on the home page: ['TICKER', 'What it is (short)', 'Full fund name']
+const POPULAR_ETFS = [
+  ['SPY',  '500 biggest US companies',  'SPDR S&P 500 ETF Trust'],
+  ['QQQ',  '100 big Nasdaq companies (tech-heavy)', 'Invesco QQQ Trust'],
+  ['VTI',  'The whole US stock market',  'Vanguard Total Stock Market ETF'],
+  ['DIA',  'The 30 Dow Jones companies', 'SPDR Dow Jones Industrial Average ETF Trust'],
+  ['XLK',  'Tech companies',             'Technology Select Sector SPDR Fund'],
+  ['ESPO', 'Video game companies',       'VanEck Video Gaming and eSports ETF'],
+];

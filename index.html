@@ -145,6 +145,24 @@ textarea:focus{border-color:var(--ink)}
 .toast.show{display:block}
 .vse{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--soft);border-radius:3px;padding:12px 14px;font-size:13px;font-weight:600}
 
+/* etf */
+.etf-badge{display:inline-block;background:#0b5fc4;color:#fff;font-size:10px;font-weight:700;letter-spacing:.5px;border-radius:2px;padding:1px 5px;margin-left:6px;vertical-align:middle;font-family:var(--sans)}
+.dd-item .sym .etf-badge{font-size:9px}
+.bf-row{padding:14px 0;border-bottom:1px solid var(--line)}
+.bf-row:last-child{border-bottom:0}
+.bf-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.bf-q{font-weight:700;font-size:14px}
+.bf-note{font-size:12px;color:var(--mute);margin:4px 0 8px}
+.gbtn{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--ink);border-radius:3px;padding:5px 10px;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;background:#fff}
+.gbtn:hover{background:var(--ink);color:#fff}
+.bf-in{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.bf-in input{border:1px solid #bbb;border-radius:3px;padding:8px 10px;outline:none;min-width:0}
+.bf-in input:focus{border-color:var(--ink)}
+.bf-out{font-size:13px;margin-top:6px;color:var(--ink2)}
+.etf-why{border:2px solid var(--ink);border-radius:3px;padding:16px;margin-bottom:20px}
+.etf-why ul{margin:8px 0 0;padding-left:18px;font-size:13px;color:var(--ink2)}
+.etf-why li{margin:4px 0}
+
 /* loading + errors */
 .skel{background:linear-gradient(90deg,#eee,#f7f7f7,#eee);background-size:200% 100%;animation:sk 1.2s infinite;border-radius:3px;color:transparent!important}
 @keyframes sk{to{background-position:-200% 0}}
@@ -218,6 +236,7 @@ const BRANDS = {
   // Disney
   'marvel':['parent','Disney','DIS'],'pixar':['parent','Disney','DIS'],'espn':['parent','Disney','DIS'],'hulu':['parent','Disney','DIS'],'star wars':['parent','Disney','DIS'],'disney plus':['parent','Disney','DIS'],'disney':['public','Disney','DIS'],
   // Nike etc
+  's&p 500':['public','SPDR S&P 500 ETF Trust','SPY'],'s&p':['public','SPDR S&P 500 ETF Trust','SPY'],'sp 500':['public','SPDR S&P 500 ETF Trust','SPY'],'sp500':['public','SPDR S&P 500 ETF Trust','SPY'],'s and p 500':['public','SPDR S&P 500 ETF Trust','SPY'],'nasdaq 100':['public','Invesco QQQ Trust','QQQ'],'nasdaq':['public','Invesco QQQ Trust','QQQ'],'dow jones':['public','SPDR Dow Jones Industrial Average ETF Trust','DIA'],'dow':['public','SPDR Dow Jones Industrial Average ETF Trust','DIA'],'total stock market':['public','Vanguard Total Stock Market ETF','VTI'],
   'berkshire hathaway':['public','Berkshire Hathaway (Class B)','BRK.B'],'berkshire':['public','Berkshire Hathaway (Class B)','BRK.B'],'geico':['parent','Berkshire Hathaway','BRK.B'],'dairy queen':['parent','Berkshire Hathaway','BRK.B'],'sees candies':['parent','Berkshire Hathaway','BRK.B'],'duracell':['parent','Berkshire Hathaway','BRK.B'],
   'jordan':['parent','Nike','NKE'],'air jordan':['parent','Nike','NKE'],'converse':['parent','Nike','NKE'],'nike':['public','Nike','NKE'],
   'vans':['parent','VF Corp','VFC'],'the north face':['parent','VF Corp','VFC'],'north face':['parent','VF Corp','VFC'],'timberland':['parent','VF Corp','VFC'],
@@ -255,6 +274,12 @@ const PRIVATE_NOTES = {
   'snickers':'Snickers is made by Mars, a private family company.','skittles':'Skittles is made by Mars, a private family company.',
   'steam':'Steam is run by Valve, which is private.','tiktok':'TikTok\'s owner, ByteDance, is private.'
 };
+
+const ETF_LIST = (typeof POPULAR_ETFS!=='undefined') ? POPULAR_ETFS : [];
+const ETF_SET = new Set(ETF_LIST.map(e=>e[0]));
+const ETF_INFO = Object.fromEntries(ETF_LIST.map(e=>[e[0],{short:e[1],name:e[2]||e[0]}]));
+function fundName(n){ const keep=/^(ETF|SPDR|S&P|QQQ|ESG|US|USA|MSCI|REIT|AI|II|III|ARK|VANECK|NYSE|FTSE|CRSP)$/;
+  return String(n||'').split(/\s+/).map(w=>keep.test(w)?(w==='VANECK'?'VanEck':w):w.charAt(0)+w.slice(1).toLowerCase()).join(' ').replace(/\bEsports\b/,'eSports'); }
 
 /* =========================================================
    HELPERS
@@ -324,16 +349,16 @@ function wireSearch(root){
   const inp=root.querySelector('input'), dd=root.querySelector('.dd');
   let t=null, items=[], act=-1, seq=0;
   const close=()=>{ dd.classList.remove('show'); act=-1; };
-  const pick=i=>{ const it=items[i]; if(!it||!it.sym) return; inp.value=''; close(); openQuote(it.sym); };
+  const pick=i=>{ const it=items[i]; if(!it||!it.sym) return; inp.value=''; close(); openQuote(it.sym,{etf:it.etf,name:it.name}); };
   const draw=(note,list,loading,err)=>{
     items=[]; let h='';
     if(note){ h+=`<div class="dd-note">${note.html||''}</div>`; }
-    if(note&&note.sym){ items.push({sym:note.sym,name:note.name}); }
-    (list||[]).forEach(r=>{ if(!items.some(x=>x.sym===r.symbol)) items.push({sym:r.symbol,name:r.description}); });
-    h+=items.map((it,i)=>`<div class="dd-item${i===act?' act':''}" data-i="${i}"><span class="sym">${esc(it.sym)}</span><span class="nm">${esc(it.name)}</span></div>`).join('');
+    if(note&&note.sym){ items.push({sym:note.sym,name:note.name,etf:ETF_SET.has(note.sym)}); }
+    (list||[]).forEach(r=>{ if(!items.some(x=>x.sym===r.symbol)){ const etf=/etp|etf/i.test(r.type||'')||ETF_SET.has(r.symbol); items.push({sym:r.symbol,name:etf?fundName(r.description):r.description,etf}); } });
+    h+=items.map((it,i)=>`<div class="dd-item${i===act?' act':''}" data-i="${i}"><span class="sym">${esc(it.sym)}${it.etf?'<span class="etf-badge">ETF</span>':''}</span><span class="nm">${esc(it.name)}</span></div>`).join('');
     if(loading) h+=`<div class="dd-note" style="background:#fff">Searching…</div>`;
     if(err) h+=`<div class="dd-note">${esc(err)}</div>`;
-    if(!loading&&!err&&!items.length&&!(note&&note.html)) h+=`<div class="dd-note" style="background:#fff">No stocks found. It might be private, or owned by a bigger company — <a href="${gsearch('who owns '+inp.value)}" target="_blank" rel="noopener">search who owns it</a>.</div>`;
+    if(!loading&&!err&&!items.length&&!(note&&note.html)) h+=`<div class="dd-note" style="background:#fff">No stocks or ETFs found. It might be private, or owned by a bigger company — <a href="${gsearch('who owns '+inp.value)}" target="_blank" rel="noopener">search who owns it</a>.</div>`;
     dd.innerHTML=h; dd.classList.toggle('show',!!h);
     dd.querySelectorAll('.dd-item').forEach(el=>el.onmousedown=e=>{ e.preventDefault(); pick(+el.dataset.i); });
   };
@@ -347,7 +372,7 @@ function wireSearch(root){
     try{
       const d=await cached('s:'+q.toLowerCase(),()=>fh('search',{q}),300000);
       if(my!==seq) return;
-      const list=(d.result||[]).filter(r=>/common stock|adr/i.test(r.type||'')&&r.symbol&&(!r.symbol.includes('.')||/^[A-Z]+\.[AB]$/.test(r.symbol))).slice(0,6);
+      const list=(d.result||[]).filter(r=>/common stock|adr|etp|etf/i.test(r.type||'')&&r.symbol&&(!r.symbol.includes('.')||/^[A-Z]+\.[AB]$/.test(r.symbol))).slice(0,6);
       draw(note,list,false);
     }catch(e){ if(my===seq) draw(note,[],false,errText(e)); }
   };
@@ -407,7 +432,7 @@ const SIG={buy:'BUY',hold:'HOLD',sell:'SELL',none:'N/A'};
    ========================================================= */
 let view='home', Q=null;
 function setSub(){
-  $('#subbar').innerHTML = `<span>POPULAR:</span>`+POPULAR.map(([s])=>`<a data-s="${s}">${s}</a>`).join('');
+  $('#subbar').innerHTML = `<span>POPULAR:</span>`+POPULAR.map(([s])=>`<a data-s="${s}">${s}</a>`).join('')+(ETF_LIST.length?`<span style="margin-left:8px">ETFs:</span>`+ETF_LIST.map(([s])=>`<a data-s="${s}">${s}</a>`).join(''):'');
   $('#subbar').querySelectorAll('a').forEach(a=>a.onclick=()=>openQuote(a.dataset.s));
 }
 function go(v){ view=v; window.scrollTo(0,0); ({home:viewHome,quote:viewQuote,picks:viewPicks,settings:viewSettings}[v]||viewHome)(); }
@@ -418,12 +443,14 @@ function viewHome(){
   <section class="hero">
     <div class="small muted" style="font-weight:700;letter-spacing:.5px">STOCK RESEARCH · PRACTICE TOOL</div>
     <h1>Look up any company. Read the real numbers. Make your call.</h1>
-    <p>Search a company to see its live stock price, key numbers, and latest headlines. Then decide: buy, hold, or sell?</p>
-    <div class="search" id="heroSearch"><span class="mag">🔍</span><input type="text" placeholder="Try Nike, Roblox, or Gatorade" autocomplete="off" spellcheck="false"><div class="dd"></div></div>
+    <p>Search a company or an ETF to see its live price, key numbers, and latest headlines. Then decide: buy, hold, or sell?</p>
+    <div class="search" id="heroSearch"><span class="mag">🔍</span><input type="text" placeholder="Try Nike, Roblox, Gatorade, or S&amp;P 500" autocomplete="off" spellcheck="false"><div class="dd"></div></div>
   </section>
   ${!getKey()?`<div class="alert">⚠ Live data isn't set up yet. Teacher: click ⚙ in the top bar to add the data key.</div>`:''}
   <h2 class="sec-h">Popular Stocks</h2>
   <div class="pop" id="pop">${POPULAR.map(([s,n])=>`<div class="pop-item" data-s="${s}"><div class="sym">${s}</div><div class="nm">${esc(n)}</div><div class="px small muted" style="font-weight:600">View quote →</div></div>`).join('')}</div>
+  ${ETF_LIST.length?`<h2 class="sec-h" style="margin-top:26px">Popular ETFs <span class="small muted" style="text-transform:none;font-family:var(--sans);font-weight:600;letter-spacing:0">· one ticker, a whole basket of companies</span></h2>
+  <div class="pop">${ETF_LIST.map(([s,d])=>`<div class="pop-item" data-s="${s}"><div class="sym">${s}<span class="etf-badge">ETF</span></div><div class="nm">${esc(d)}</div><div class="px small muted" style="font-weight:600">View fund →</div></div>`).join('')}</div>`:''}
   ${loadPicks().length?`<div style="margin-top:22px"><a href="#" id="seePicks" style="font-weight:700">★ You have ${loadPicks().length} saved pick${loadPicks().length>1?'s':''} →</a></div>`:''}
   <div class="foot">Practice tool for learning — not financial advice. Prices may be delayed.</div>`;
   wireSearch($('#heroSearch'));
@@ -434,9 +461,9 @@ function viewHome(){
 }
 
 /* ---------- QUOTE ---------- */
-async function openQuote(sym){
-  sym=String(sym).toUpperCase().trim();
-  Q={sym, status:'loading', call:'', why:''};
+async function openQuote(sym,hint){
+  sym=String(sym).toUpperCase().trim(); hint=hint||{};
+  Q={sym, status:'loading', call:'', why:'', etf:!!hint.etf||ETF_SET.has(sym), facts:{track:'',top:'',count:'',fee:''}};
   go('quote');
   const my=Q;
   if(!getKey()){ my.status='err'; my.err=errText(); if(Q===my) viewQuote(); return; }
@@ -454,10 +481,18 @@ async function openQuote(sym){
   const mt=m.status==='fulfilled'?((m.value||{}).metric||{}):{};
   const nn=n.status==='fulfilled'&&Array.isArray(n.value)?n.value:[];
   const num=x=>typeof x==='number'&&isFinite(x)?x:null;
+  // ETF check: if the company profile is empty, ask search whether this ticker is a fund
+  let etfName=hint.name||(ETF_INFO[sym]&&ETF_INFO[sym].name)||'';
+  if(!my.etf && !pp.name){
+    try{ const sr=await cached('s:'+sym.toLowerCase(),()=>fh('search',{q:sym}),300000);
+      const hit=(sr.result||[]).find(r=>r.symbol===sym);
+      if(hit && /etp|etf/i.test(hit.type||'')){ my.etf=true; etfName=fundName(hit.description); } }catch(e){}
+    if(Q!==my) return;
+  }
   Object.assign(my,{
     status:'ok', time:new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}),
     price:qq.c, d:num(qq.d), dp:num(qq.dp),
-    name:pp.name||sym, logo:pp.logo||'', exch:pp.exchange||'', ind:pp.finnhubIndustry||'', web:pp.weburl||'', country:pp.country||'', ipo:pp.ipo||'', cap:num(pp.marketCapitalization)||num(mt.marketCapitalization), cur:pp.currency||'USD',
+    name:my.etf?(etfName||pp.name||sym):(pp.name||sym), logo:pp.logo||'', exch:pp.exchange||'', ind:pp.finnhubIndustry||'', web:pp.weburl||'', country:pp.country||'', ipo:pp.ipo||'', cap:num(pp.marketCapitalization)||num(mt.marketCapitalization), cur:pp.currency||'USD',
     lo:num(mt['52WeekLow']), hi:num(mt['52WeekHigh']),
     pe:[mt.peTTM,mt.peBasicExclExtraTTM,mt.peNormalizedAnnual].map(num).find(x=>x!==null) ?? null,
     rev:[mt.revenueGrowthTTMYoy,mt.revenueGrowthQuarterlyYoy].map(num).find(x=>x!==null) ?? null,
@@ -481,6 +516,7 @@ function viewQuote(){
     $('#retry').onclick=()=>{ delete cache['q:'+Q.sym]; openQuote(Q.sym); };
     return;
   }
+  if(Q.etf){ viewEtf(); return; }
   const wv=waveRead(Q.price,Q.lo,Q.hi), pe=peRead(Q.pe), rv=revRead(Q.rev), sg=signal(Q);
   const tag=(r,id)=>`<button class="help-tag ${r.k}" data-x="${id}">${r.tag}</button>`;
   const ex=(r,id)=>`<div class="explain" id="x-${id}">${r.text}</div>`;
@@ -571,6 +607,152 @@ function viewQuote(){
   };
 }
 
+/* ---------- ETF PAGE ---------- */
+function feeRead(f){
+  if(typeof f!=='number'||!isFinite(f)||f<0) return null;
+  const per1k=f/100*1000;
+  const k = f<=0.10?'good':f<=0.50?'mid':'bad';
+  const tag = f<=0.10?'Very cheap':f<=0.50?'Normal':'Pricey';
+  return {k,tag,text:`A ${+f.toFixed(4)}% fee means you pay about $${fmt(per1k,2)} a year for every $1,000 invested. Under 0.10% is very cheap; over 0.50% is on the pricey side for an ETF.`};
+}
+function countRead(n){
+  if(typeof n!=='number'||!isFinite(n)||n<1) return null;
+  if(n<30) return {k:'warn',tag:'Small basket',text:`${fmt(n,0)} companies is a small basket. If one or two do badly, you'll feel it.`};
+  if(n<200) return {k:'mid',tag:'Medium basket',text:`${fmt(n,0)} companies spreads your money out, but it's still focused on one area.`};
+  return {k:'good',tag:'Big basket',text:`${fmt(n,0)} companies is very spread out. One company having a bad year barely moves the whole fund.`};
+}
+function viewEtf(){
+  const wv=waveRead(Q.price,Q.lo,Q.hi), F=Q.facts, s=Q.sym;
+  const short=ETF_INFO[s]?ETF_INFO[s].short:'';
+  const g=(q,label)=>`<a class="gbtn" href="${gsearch(q)}" target="_blank" rel="noopener">🔍 ${label}</a>`;
+  app.innerHTML=`
+  <div class="q-head">
+    <div class="q-logo">ETF</div>
+    <div class="q-meta">
+      <div class="crumb">ETF : ${esc(s)}</div>
+      <h1 class="q-name">${esc(Q.name)}</h1>
+      <div class="q-tags"><span class="tag" style="border-color:#0b5fc4;color:#0b5fc4">Exchange-Traded Fund</span>${short?`<span class="tag">${esc(short)}</span>`:''}</div>
+    </div>
+    <div class="q-price">
+      <div class="px"><small>$</small>${fmt(Q.price)}</div>
+      ${Q.d!==null?`<div class="chg ${cls(Q.d)}">${Q.d>0?'▲':Q.d<0?'▼':''} ${sign(Q.d)} (${sign(Q.dp)}%) today</div>`:''}
+      <div class="asof">Live price · fetched ${esc(Q.time)} · may be delayed</div>
+    </div>
+  </div>
+
+  <div class="q-grid">
+    <div>
+      <section class="card">
+        <h2 class="sec-h">Price Data</h2>
+        <table class="kd">
+          <tr><td class="k">52-Week Range</td><td class="v">
+            ${wv?`<button class="help-tag ${wv.k}" data-x="wv">${wv.tag}</button><div class="range"><div class="range-bar"><div class="range-dot" style="left:${(wv.pos*100).toFixed(1)}%"></div></div><div class="range-lab"><span>${usd(Q.lo)}</span><span>${usd(Q.hi)}</span></div></div><div class="explain" id="x-wv">${wv.text}</div>`
+              :`<span class="muted small" style="font-weight:600">Not in live data</span> ${g(s+' 52 week range','Google')}`}
+          </td></tr>
+          <tr><td class="k">Today</td><td class="v">${Q.d!==null?`<span class="chg ${cls(Q.d)}">${sign(Q.dp)}%</span>`:'—'}</td></tr>
+        </table>
+      </section>
+
+      <section class="card">
+        <h2 class="sec-h">Basket Facts · You're the Researcher</h2>
+        <div class="small muted">Live data can't see inside funds, so use the Google buttons and fill these in. Your answers save with your pick.</div>
+
+        <div class="bf-row">
+          <div class="bf-top"><span class="bf-q">1. What does it track?</span>${g('what does '+s+' ETF track','What does it track?')}</div>
+          <div class="bf-note">Most ETFs copy an index, a list of companies like "the 500 biggest US companies."</div>
+          <div class="bf-in"><input id="bfTrack" type="text" placeholder="e.g. the S&P 500" value="${esc(F.track)}" style="flex:1"></div>
+        </div>
+
+        <div class="bf-row">
+          <div class="bf-top"><span class="bf-q">2. What's inside? Top holding</span>${g(s+' ETF top holdings','What\'s inside?')}</div>
+          <div class="bf-note">The top holding is the company the fund owns the most of.</div>
+          <div class="bf-in"><input id="bfTop" type="text" placeholder="e.g. Nvidia" value="${esc(F.top)}" style="flex:1"></div>
+        </div>
+
+        <div class="bf-row">
+          <div class="bf-top"><span class="bf-q">3. How many companies?</span>${g(s+' ETF number of holdings','How many?')}</div>
+          <div class="bf-note">More companies means your money is more spread out.</div>
+          <div class="bf-in"><input id="bfCount" type="number" inputmode="numeric" placeholder="e.g. 503" value="${esc(F.count)}" style="width:130px"><span id="bfCountTag"></span></div>
+          <div class="explain" id="x-cnt"></div>
+        </div>
+
+        <div class="bf-row">
+          <div class="bf-top"><span class="bf-q">4. What's the fee? (expense ratio)</span>${g(s+' ETF expense ratio','What\'s the fee?')}</div>
+          <div class="bf-note">The expense ratio is the yearly fee. 0.10% means $1 a year for every $1,000 you invest.</div>
+          <div class="bf-in"><input id="bfFee" type="number" inputmode="decimal" step="any" placeholder="e.g. 0.09" value="${esc(F.fee)}" style="width:130px"><b>%</b><span id="bfFeeTag"></span></div>
+          <div class="bf-out" id="bfFeeOut"></div>
+          <div class="explain" id="x-fee"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="sec-h">Latest News</h2>
+        ${Q.news.length? Q.news.map(n=>`<a class="news-item" href="${esc(n.url)}" target="_blank" rel="noopener"><div><h4>${esc(n.headline)}</h4><div class="src"><b>${esc(n.source||'News')}</b> · ${timeAgo(n.datetime)}</div></div></a>`).join('')
+          : `<p class="muted" style="margin:0">Fund headlines aren't in the live data. ${g(s+' ETF','Search Google News')}</p>`.replace('href="'+gsearch(s+' ETF')+'"','href="https://www.google.com/search?tbm=nws&q='+encodeURIComponent(s+' ETF')+'"')}
+      </section>
+    </div>
+
+    <aside>
+      <section class="etf-why">
+        <div class="small muted" style="font-weight:700;letter-spacing:.4px">CLUB DESK SIGNAL</div>
+        <div class="sig-top" style="margin-top:4px"><div class="small" style="font-weight:600">Not used for ETFs</div><div class="sig-badge none">N/A</div></div>
+        <ul>
+          <li>An ETF is a basket of many companies, so it doesn't have one P/E or one sales number.</li>
+          <li>Instead, look at what's in the basket, how spread out it is, and the fee.</li>
+          <li>Compare: one company can drop 50% in a bad year. A big basket rarely moves that much, because the winners help cover the losers.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2 class="sec-h">Your Call</h2>
+        <div class="small muted">Look at the basket, the fee, and the price. What would you do?</div>
+        <div class="calls">
+          <button class="call buy" data-c="buy">BUY</button><button class="call hold" data-c="hold">HOLD</button><button class="call sell" data-c="sell">SELL</button>
+        </div>
+        <textarea id="why" placeholder="Why? (mention something about the basket or the fee)"></textarea>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="savePick">★ Save to My Picks</button></div>
+        <div class="small" id="saveErr" style="color:var(--down);font-weight:600;margin-top:6px"></div>
+        <div class="toast" id="toast"></div>
+      </section>
+
+      <div class="vse"><span>Ready to trade it with virtual money?</span><a class="btn sm" href="${esc(VSE_URL)}" target="_blank" rel="noopener">Open VSE ↗</a></div>
+
+      <section class="card" style="margin-top:20px">
+        <h2 class="sec-h">What's an ETF?</h2>
+        <div class="prof-row"><span>One share buys</span><span>A tiny slice of every company in the basket</span></div>
+        <div class="prof-row"><span>Trades like</span><span>A stock, all day on the exchange</span></div>
+        <div class="prof-row"><span>You pay</span><span>A small yearly fee (expense ratio)</span></div>
+        <div class="prof-row"><span>Main benefit</span><span>Spreads out your risk</span></div>
+      </section>
+    </aside>
+  </div>
+  <div class="foot">Price data from Finnhub. Basket facts are what you found. Practice tool for learning, not financial advice.</div>`;
+
+  app.querySelectorAll('.help-tag[data-x]').forEach(b=>b.onclick=()=>$('#x-'+b.dataset.x).classList.toggle('show'));
+  const tagBtn=(r,id)=>r?`<button class="help-tag ${r.k}" data-x="${id}">${r.tag}</button>`:'';
+  const upd=()=>{
+    F.track=$('#bfTrack').value; F.top=$('#bfTop').value; F.count=$('#bfCount').value; F.fee=$('#bfFee').value;
+    const c=countRead(parseFloat(F.count)), f=feeRead(parseFloat(F.fee));
+    $('#bfCountTag').innerHTML=tagBtn(c,'cnt'); $('#x-cnt').textContent=c?c.text:''; if(!c) $('#x-cnt').classList.remove('show');
+    $('#bfFeeTag').innerHTML=tagBtn(f,'fee'); $('#x-fee').textContent=f?f.text:''; if(!f) $('#x-fee').classList.remove('show');
+    $('#bfFeeOut').innerHTML=f?`That's about <b>$${fmt(parseFloat(F.fee)/100*1000,2)} a year</b> for every $1,000 invested.`:'';
+    ['bfCountTag','bfFeeTag'].forEach(id=>{ const b=$('#'+id+' .help-tag'); if(b) b.onclick=()=>$('#x-'+b.dataset.x).classList.toggle('show'); });
+  };
+  ['bfTrack','bfTop','bfCount','bfFee'].forEach(id=>$('#'+id).oninput=upd); upd();
+  app.querySelectorAll('.call').forEach(b=>b.onclick=()=>{ Q.call=b.dataset.c; app.querySelectorAll('.call').forEach(x=>x.classList.toggle('sel',x===b)); $('#saveErr').textContent=''; });
+  $('#why').oninput=e=>Q.why=e.target.value;
+  $('#savePick').onclick=()=>{
+    if(!Q.call){ $('#saveErr').textContent='Pick BUY, HOLD, or SELL first.'; return; }
+    if(Q.saved){ $('#saveErr').textContent='Already saved. Find it in My Picks.'; return; }
+    Q.saved=true;
+    const rec={id:Date.now(), date:today(), sym:Q.sym, name:Q.name, price:Q.price, call:Q.call, why:Q.why.trim(), etf:true, facts:{...F}};
+    const l=loadPicks(); l.unshift(rec); savePicks(l);
+    const t=$('#toast'); t.innerHTML=`Saved! You called <b>${SIG[Q.call]}</b> on ${esc(Q.sym)} at ${usd(Q.price)}. <a href="#" id="toPicks">See My Picks →</a>`; t.classList.add('show');
+    $('#toPicks').onclick=e=>{e.preventDefault(); go('picks');};
+    $('#savePick').textContent='✓ Saved';
+  };
+}
+
 /* ---------- MY PICKS ---------- */
 function viewPicks(){
   const l=loadPicks();
@@ -582,7 +764,7 @@ function viewPicks(){
   <table class="pk-table">
     <thead><tr><th>Stock</th><th>Your call</th><th class="num hide-m">Picked</th><th class="num">Price then</th><th class="num">Price now</th><th class="num">Change</th><th>Result</th><th></th></tr></thead>
     <tbody>${l.map(r=>`<tr data-id="${r.id}">
-      <td><span class="pk-sym" data-s="${esc(r.sym)}">${esc(r.sym)}</span><div class="small muted">${esc(r.name)}</div></td>
+      <td><span class="pk-sym" data-s="${esc(r.sym)}">${esc(r.sym)}</span>${r.etf?'<span class="etf-badge">ETF</span>':''}<div class="small muted">${esc(r.name)}</div></td>
       <td><span class="pill ${r.call}">${SIG[r.call]}</span>${r.why?`<div class="pk-why">${esc(r.why)}</div>`:''}</td>
       <td class="num hide-m small">${esc(r.date)}</td>
       <td class="num">${usd(r.price)}</td>
@@ -593,7 +775,7 @@ function viewPicks(){
   </table>
   <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost sm" id="copyPicks">Copy my picks</button><span class="small muted" id="copyMsg" style="align-self:center"></span></div>`
   :`<div class="alert">No picks yet. Search a company in the top bar, make your call, and save it.</div>`}`;
-  app.querySelectorAll('.pk-sym').forEach(el=>el.onclick=()=>openQuote(el.dataset.s));
+  app.querySelectorAll('.pk-sym').forEach(el=>el.onclick=()=>{ const r=l.find(x=>x.sym===el.dataset.s); openQuote(el.dataset.s,{etf:r&&r.etf,name:r&&r.name}); });
   app.querySelectorAll('.del').forEach(b=>b.onclick=()=>{
     if(!b.dataset.arm){ b.dataset.arm='1'; b.textContent='Delete?'; b.style.color='var(--down)'; setTimeout(()=>{ if(b.isConnected){ delete b.dataset.arm; b.textContent='✕'; b.style.color=''; } },3000); return; }
     const id=+b.closest('tr').dataset.id; savePicks(loadPicks().filter(x=>x.id!==id)); viewPicks();

@@ -2,6 +2,8 @@
 
 A stock-research practice site for the Cranbrook middle school investing club. Students search a company, read the live price, 52-week range, P/E, sales growth, and headlines, then make and save a Buy/Hold/Sell call.
 
+ETFs get their own page: live price and 52-week range, plus a "Basket Facts" section where students use Google buttons to find what the fund tracks, its top holding, how many companies it holds, and its fee (the free data plan can't see inside funds).
+
 **Live site:** https://scoobytoth1999.github.io/club-desk/
 
 ## Quick edits (no coding)
@@ -11,6 +13,7 @@ Open `config.js` on GitHub, click the pencil icon, edit, then **Commit changes**
 - `FINNHUB_KEY`: the stock-data key from finnhub.io
 - `VSE_URL`: where the "VSE Game" button goes
 - `POPULAR`: the stocks shown on the home page
+- `POPULAR_ETFS`: the ETFs shown on the home page
 
 ## Files
 
