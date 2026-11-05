@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cranbrook Investing Club Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#111; --ink2:#333; --mute:#6b6b6b; --line:#e2e2e2; --bg:#fff; --soft:#f5f5f5;
+  --up:#0b8a3a; --down:#d0312d; --flat:#7a7a7a; --accent:#0b5fc4;
+  --cond:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --sans:"Inter",Arial,Helvetica,sans-serif;
+  --serif:"Source Serif 4",Georgia,serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--sans);color:var(--ink);background:var(--bg);font-size:15px;line-height:1.45}
+a{color:inherit}
+button,input,textarea{font-family:inherit;font-size:inherit;color:inherit}
+
+/* ---------- top bar ---------- */
+.topbar{background:var(--ink);color:#fff;position:sticky;top:0;z-index:20}
+.tb-in{max-width:1200px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:18px}
+.logo{font-family:var(--cond);font-weight:700;font-size:26px;letter-spacing:.5px;cursor:pointer;white-space:nowrap;line-height:1}
+.logo span{color:#4fd17a}
+@media (max-width:520px){.logo{font-size:20px;white-space:normal;max-width:220px}}
+.search{position:relative;flex:1;max-width:460px}
+.search input{width:100%;border:0;border-radius:3px;padding:9px 12px 9px 34px;background:#fff;color:var(--ink);outline:none}
+.search .mag{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#888;font-size:14px;pointer-events:none}
+.dd{position:absolute;left:0;right:0;top:calc(100% + 4px);background:#fff;color:var(--ink);border:1px solid var(--line);box-shadow:0 8px 24px rgba(0,0,0,.18);border-radius:3px;display:none;z-index:30;max-height:360px;overflow:auto}
+.dd.show{display:block}
+.dd-item{display:flex;justify-content:space-between;gap:12px;padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+.dd-item:last-child{border-bottom:0}
+.dd-item:hover,.dd-item.act{background:#eef4fd}
+.dd-item .sym{font-weight:700;font-family:var(--cond);font-size:17px}
+.dd-item .nm{color:var(--ink2);font-size:13px}
+.dd-note{padding:10px 12px;font-size:13px;color:var(--ink2);background:#fffbe6;border-bottom:1px solid var(--line)}
+.dd-note b{color:var(--ink)}
+.nav{display:flex;gap:4px;margin-left:auto}
+.nav a,.nav button{background:none;border:0;color:#ddd;font-weight:600;font-size:13px;padding:8px 10px;border-radius:3px;cursor:pointer;text-decoration:none;white-space:nowrap}
+.nav a:hover,.nav button:hover{background:#2a2a2a;color:#fff}
+.subbar{border-bottom:1px solid var(--line);background:#fafafa}
+.sb-in{max-width:1200px;margin:0 auto;padding:6px 20px;display:flex;gap:16px;overflow:auto;font-size:12px;font-weight:600;color:var(--mute);white-space:nowrap}
+.sb-in a{text-decoration:none;cursor:pointer}
+.sb-in a:hover{color:var(--accent)}
+
+main{max-width:1200px;margin:0 auto;padding:20px 20px 60px}
+h1,h2,h3{margin:0}
+.sec-h{font-family:var(--cond);font-weight:700;font-size:20px;text-transform:uppercase;letter-spacing:.4px;border-bottom:3px solid var(--ink);padding-bottom:4px;margin:0 0 10px}
+.muted{color:var(--mute)}
+.small{font-size:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--ink);background:var(--ink);color:#fff;font-weight:700;padding:9px 16px;border-radius:3px;cursor:pointer;text-decoration:none;font-size:14px}
+.btn:hover{background:#333}
+.btn.ghost{background:#fff;color:var(--ink)}
+.btn.ghost:hover{background:var(--soft)}
+.btn.sm{padding:6px 10px;font-size:12px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* ---------- home ---------- */
+.hero{padding:30px 0 10px;border-bottom:1px solid var(--line);margin-bottom:22px}
+.hero h1{font-family:var(--serif);font-size:34px;line-height:1.15;max-width:720px}
+.hero p{color:var(--ink2);max-width:640px;margin:10px 0 18px}
+.hero .search{max-width:560px}
+.hero .search input{border:2px solid var(--ink);padding:12px 14px 12px 38px;font-size:16px}
+.pop{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.pop-item{border:1px solid var(--line);border-radius:3px;padding:10px 12px;cursor:pointer;background:#fff}
+.pop-item:hover{border-color:var(--ink)}
+.pop-item .sym{font-family:var(--cond);font-weight:700;font-size:18px}
+.pop-item .nm{font-size:12px;color:var(--mute)}
+.pop-item .px{font-weight:700;margin-top:4px}
+.chg{font-weight:700}
+.chg.up{color:var(--up)}.chg.down{color:var(--down)}.chg.flat{color:var(--flat)}
+
+/* ---------- quote page ---------- */
+.q-head{display:flex;gap:16px;align-items:flex-start;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.q-logo{width:56px;height:56px;border:1px solid var(--line);border-radius:4px;display:grid;place-items:center;overflow:hidden;flex:none;background:#fff;font-family:var(--cond);font-weight:700;font-size:20px;color:var(--mute)}
+.q-logo img{width:100%;height:100%;object-fit:contain}
+.q-meta .crumb{font-size:12px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.5px}
+.q-name{font-family:var(--serif);font-size:30px;line-height:1.1;margin:2px 0 4px}
+.q-tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:11px;font-weight:700;border:1px solid var(--line);border-radius:2px;padding:2px 6px;color:var(--ink2);text-transform:uppercase;letter-spacing:.3px}
+.q-price{margin-left:auto;text-align:right}
+.q-price .px{font-family:var(--cond);font-weight:700;font-size:48px;line-height:1}
+.q-price .px small{font-size:20px;color:var(--mute);margin-right:2px}
+.q-price .chg{font-size:18px;font-family:var(--cond)}
+.q-price .asof{font-size:11px;color:var(--mute);margin-top:4px}
+.q-grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(300px,1fr);gap:28px;margin-top:20px}
+.card{border:1px solid var(--line);border-radius:3px;padding:16px;margin-bottom:20px;background:#fff}
+
+/* key data table */
+.kd{width:100%;border-collapse:collapse}
+.kd td{padding:11px 4px;border-bottom:1px solid var(--line);vertical-align:middle}
+.kd td.k{color:var(--ink2);font-size:13px;width:38%}
+.kd td.v{font-weight:700;text-align:right;font-size:15px}
+.kd tr:last-child td{border-bottom:0}
+.help-tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;border-radius:10px;padding:2px 8px;margin-left:8px;cursor:pointer;border:0;vertical-align:middle;text-transform:uppercase;letter-spacing:.3px}
+.help-tag.good{background:#e3f4e8;color:var(--up)}
+.help-tag.bad{background:#fbe6e5;color:var(--down)}
+.help-tag.mid{background:#f0f0f0;color:#555}
+.help-tag.warn{background:#fff1d6;color:#9a5b00}
+.help-tag::after{content:'ⓘ';font-size:11px;opacity:.7}
+.explain{display:none;background:#f7f9fc;border-left:3px solid var(--accent);padding:8px 12px;font-size:13px;color:var(--ink2);margin-top:8px;text-align:left;font-weight:400}
+.explain.show{display:block}
+.range{margin-top:6px}
+.range-bar{position:relative;height:6px;background:linear-gradient(90deg,#d0312d,#c9c9c9 50%,#0b8a3a);border-radius:3px;margin:8px 0 4px}
+.range-dot{position:absolute;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:var(--ink);border:2px solid #fff;box-shadow:0 0 0 1px var(--ink)}
+.range-lab{display:flex;justify-content:space-between;font-size:12px;color:var(--mute);font-weight:600}
+
+/* news */
+.news-item{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);text-decoration:none}
+.news-item:last-child{border-bottom:0}
+.news-item h4{margin:0;font-family:var(--serif);font-size:17px;line-height:1.25;font-weight:600}
+.news-item:hover h4{color:var(--accent);text-decoration:underline}
+.news-item .src{font-size:12px;color:var(--mute);margin-top:4px;font-weight:600}
+.news-item .src b{color:var(--ink2);text-transform:uppercase;letter-spacing:.3px}
+
+/* profile */
+.prof-row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.prof-row:last-child{border-bottom:0}
+.prof-row span:first-child{color:var(--mute)}
+.prof-row span:last-child{font-weight:700;text-align:right;overflow-wrap:anywhere}
+
+/* signal + call */
+.signal{border:2px solid var(--ink);border-radius:3px;padding:16px;margin-bottom:20px}
+.sig-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.sig-badge{font-family:var(--cond);font-weight:700;font-size:28px;padding:2px 16px;border-radius:3px;color:#fff;letter-spacing:.5px}
+.sig-badge.buy{background:var(--up)}.sig-badge.hold{background:#8a8a8a}.sig-badge.sell{background:var(--down)}.sig-badge.none{background:#bbb}
+.sig-list{list-style:none;padding:0;margin:12px 0 6px}
+.sig-list li{display:flex;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.sig-list li:last-child{border:0}
+.sig-list .ic{width:18px;flex:none;text-align:center;font-weight:700}
+.ic.g{color:var(--up)}.ic.r{color:var(--down)}.ic.n{color:var(--flat)}
+.calls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.call{border:2px solid var(--line);background:#fff;border-radius:3px;padding:10px 4px;font-family:var(--cond);font-weight:700;font-size:20px;cursor:pointer;letter-spacing:.5px}
+.call:hover{border-color:var(--ink)}
+.call.sel.buy{background:var(--up);border-color:var(--up);color:#fff}
+.call.sel.hold{background:#8a8a8a;border-color:#8a8a8a;color:#fff}
+.call.sel.sell{background:var(--down);border-color:var(--down);color:#fff}
+textarea{width:100%;border:1px solid #bbb;border-radius:3px;padding:10px;min-height:70px;resize:vertical;outline:none}
+textarea:focus{border-color:var(--ink)}
+.toast{display:none;background:#e3f4e8;border:1px solid #b6dfc3;color:#0a5c27;font-weight:600;font-size:13px;padding:10px 12px;border-radius:3px;margin-top:10px}
+.toast.show{display:block}
+.vse{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--soft);border-radius:3px;padding:12px 14px;font-size:13px;font-weight:600}
+
+/* loading + errors */
+.skel{background:linear-gradient(90deg,#eee,#f7f7f7,#eee);background-size:200% 100%;animation:sk 1.2s infinite;border-radius:3px;color:transparent!important}
+@keyframes sk{to{background-position:-200% 0}}
+.alert{border:1px solid #f0c36d;background:#fff8e6;border-radius:3px;padding:12px 14px;font-size:14px;margin:14px 0}
+.alert.red{border-color:#f1b0ad;background:#fdf0ef}
+
+/* picks */
+.pk-table{width:100%;border-collapse:collapse;font-size:14px}
+.pk-table th{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--mute);text-align:left;padding:8px 6px;border-bottom:2px solid var(--ink)}
+.pk-table td{padding:10px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+.pk-table td.num,.pk-table th.num{text-align:right}
+.pk-sym{font-family:var(--cond);font-weight:700;font-size:17px;cursor:pointer}
+.pk-sym:hover{color:var(--accent)}
+.pill{display:inline-block;font-family:var(--cond);font-weight:700;font-size:14px;color:#fff;border-radius:2px;padding:1px 8px}
+.pill.buy{background:var(--up)}.pill.hold{background:#8a8a8a}.pill.sell{background:var(--down)}
+.pk-why{font-size:12px;color:var(--mute);margin-top:2px;max-width:320px}
+.del{background:none;border:0;color:#aaa;cursor:pointer;font-size:12px}
+.del:hover{color:var(--down)}
+.foot{border-top:1px solid var(--line);margin-top:30px;padding-top:12px;font-size:12px;color:var(--mute)}
+input.txt{width:100%;border:1px solid #bbb;border-radius:3px;padding:10px;outline:none}
+input.txt:focus{border-color:var(--ink)}
+code{background:var(--soft);padding:1px 4px;border-radius:2px}
+
+@media (max-width:860px){
+  .q-grid{grid-template-columns:1fr}
+  .q-head{flex-wrap:wrap}
+  .q-price{margin-left:0;text-align:left;width:100%}
+  .tb-in{flex-wrap:wrap;gap:10px}
+  .topbar .search{order:3;max-width:none;flex-basis:100%}
+  .nav{margin-left:auto}
+  .nav .lbl{display:none}
+  .hero h1{font-size:26px}
+  .pk-table .hide-m{display:none}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="tb-in">
+    <div class="logo" id="logo">CRANBROOK <span>INVESTING</span> CLUB <span>DESK</span></div>
+    <div class="search" id="topSearch">
+      <span class="mag">🔍</span>
+      <input type="text" placeholder="Search a company or ticker (e.g. Nike, AAPL)" autocomplete="off" spellcheck="false">
+      <div class="dd"></div>
+    </div>
+    <nav class="nav">
+      <button id="navPicks">★ <span class="lbl">My Picks</span></button>
+      <a id="navVSE" href="https://www.marketwatch.com/games" target="_blank" rel="noopener">↗ <span class="lbl">VSE Game</span></a>
+      <button id="navSet" title="Teacher settings">⚙</button>
+    </nav>
+  </div>
+</header>
+<div class="subbar"><div class="sb-in" id="subbar"></div></div>
+<main id="app"></main>
+
+<script src="config.js"></script>
+<script>
+const BRANDS = {
+  // Meta
+  'instagram':['parent','Meta Platforms','META'],'facebook':['parent','Meta Platforms','META'],'whatsapp':['parent','Meta Platforms','META'],'threads':['parent','Meta Platforms','META'],'meta':['public','Meta Platforms','META'],
+  // Alphabet
+  'youtube':['parent','Alphabet (Google)','GOOGL'],'google':['public','Alphabet (Google)','GOOGL'],'android':['parent','Alphabet (Google)','GOOGL'],'gmail':['parent','Alphabet (Google)','GOOGL'],'fitbit':['parent','Alphabet (Google)','GOOGL'],'alphabet':['public','Alphabet (Google)','GOOGL'],
+  // Microsoft
+  'xbox':['parent','Microsoft','MSFT'],'minecraft':['parent','Microsoft','MSFT'],'call of duty':['parent','Microsoft','MSFT'],'linkedin':['parent','Microsoft','MSFT'],'microsoft':['public','Microsoft','MSFT'],
+  // Apple / Amazon
+  'iphone':['parent','Apple','AAPL'],'airpods':['parent','Apple','AAPL'],'ipad':['parent','Apple','AAPL'],'macbook':['parent','Apple','AAPL'],'apple':['public','Apple','AAPL'],
+  'whole foods':['parent','Amazon','AMZN'],'twitch':['parent','Amazon','AMZN'],'ring':['parent','Amazon','AMZN'],'alexa':['parent','Amazon','AMZN'],'amazon':['public','Amazon','AMZN'],
+  // PepsiCo / Coca-Cola
+  'gatorade':['parent','PepsiCo','PEP'],'doritos':['parent','PepsiCo','PEP'],'cheetos':['parent','PepsiCo','PEP'],'lays':['parent','PepsiCo','PEP'],'mountain dew':['parent','PepsiCo','PEP'],'pepsi':['parent','PepsiCo','PEP'],'pepsico':['public','PepsiCo','PEP'],
+  'sprite':['parent','Coca-Cola','KO'],'fanta':['parent','Coca-Cola','KO'],'powerade':['parent','Coca-Cola','KO'],'minute maid':['parent','Coca-Cola','KO'],'coke':['parent','Coca-Cola','KO'],'coca cola':['public','Coca-Cola','KO'],
+  // Disney
+  'marvel':['parent','Disney','DIS'],'pixar':['parent','Disney','DIS'],'espn':['parent','Disney','DIS'],'hulu':['parent','Disney','DIS'],'star wars':['parent','Disney','DIS'],'disney plus':['parent','Disney','DIS'],'disney':['public','Disney','DIS'],
+  // Nike etc
+  'berkshire hathaway':['public','Berkshire Hathaway (Class B)','BRK.B'],'berkshire':['public','Berkshire Hathaway (Class B)','BRK.B'],'geico':['parent','Berkshire Hathaway','BRK.B'],'dairy queen':['parent','Berkshire Hathaway','BRK.B'],'sees candies':['parent','Berkshire Hathaway','BRK.B'],'duracell':['parent','Berkshire Hathaway','BRK.B'],
+  'jordan':['parent','Nike','NKE'],'air jordan':['parent','Nike','NKE'],'converse':['parent','Nike','NKE'],'nike':['public','Nike','NKE'],
+  'vans':['parent','VF Corp','VFC'],'the north face':['parent','VF Corp','VFC'],'north face':['parent','VF Corp','VFC'],'timberland':['parent','VF Corp','VFC'],
+  'hollister':['parent','Abercrombie & Fitch','ANF'],'old navy':['parent','Gap Inc.','GAP'],'aerie':['parent','American Eagle Outfitters','AEO'],
+  'sephora':['parent','LVMH','LVMUY'],'louis vuitton':['parent','LVMH','LVMUY'],
+  // food
+  'taco bell':['parent','Yum! Brands','YUM'],'kfc':['parent','Yum! Brands','YUM'],'pizza hut':['parent','Yum! Brands','YUM'],
+  'burger king':['parent','Restaurant Brands International','QSR'],'popeyes':['parent','Restaurant Brands International','QSR'],'tim hortons':['parent','Restaurant Brands International','QSR'],
+  'oreo':['parent','Mondelez','MDLZ'],'chips ahoy':['parent','Mondelez','MDLZ'],'sour patch kids':['parent','Mondelez','MDLZ'],
+  'reeses':['parent','Hershey','HSY'],'kit kat':['parent','Hershey (in the U.S.)','HSY'],
+  'big mac':['parent','McDonald\'s','MCD'],
+  // toys / games
+  'nerf':['parent','Hasbro','HAS'],'monopoly':['parent','Hasbro','HAS'],'play doh':['parent','Hasbro','HAS'],
+  'barbie':['parent','Mattel','MAT'],'hot wheels':['parent','Mattel','MAT'],'uno':['parent','Mattel','MAT'],
+  'playstation':['parent','Sony','SONY'],'mario':['parent','Nintendo','NTDOY'],'nintendo switch':['parent','Nintendo','NTDOY'],'zelda':['parent','Nintendo','NTDOY'],
+  'madden':['parent','Electronic Arts','EA'],'ea sports fc':['parent','Electronic Arts','EA'],'fifa':['parent','Electronic Arts','EA'],'the sims':['parent','Electronic Arts','EA'],
+  'gta':['parent','Take-Two Interactive','TTWO'],'grand theft auto':['parent','Take-Two Interactive','TTWO'],'nba 2k':['parent','Take-Two Interactive','TTWO'],
+  // cars
+  'chevy':['parent','General Motors','GM'],'chevrolet':['parent','General Motors','GM'],'cadillac':['parent','General Motors','GM'],'gmc':['parent','General Motors','GM'],
+  'jeep':['parent','Stellantis','STLA'],'dodge':['parent','Stellantis','STLA'],'ram':['parent','Stellantis','STLA'],'chrysler':['parent','Stellantis','STLA'],
+  'lincoln':['parent','Ford','F'],'mustang':['parent','Ford','F'],
+  // private (no stock)
+  'chick fil a':['private'],'chickfila':['private'],'lego':['private'],'spacex':['private'],'trader joes':['private'],'in n out':['private'],'subway':['private'],
+  'dunkin':['private'],'dunkin donuts':['private'],'sonic':['private'],'arbys':['private'],'buffalo wild wings':['private'],'panera':['private'],
+  'epic games':['private'],'fortnite':['private'],'valve':['private'],'steam':['private'],'discord':['private'],'tiktok':['private'],'shein':['private'],
+  'red bull':['private'],'prime':['private'],'prime hydration':['private'],'stanley':['private'],'stanley cup':['private'],
+  'mars':['private'],'m&ms':['private'],'mms':['private'],'snickers':['private'],'skittles':['private'],
+  'openai':['private'],'chatgpt':['private'],'anthropic':['private'],'claude':['private'],'skims':['private'],'meijer':['private'],'publix':['private'],'aldi':['private']
+};
+const PRIVATE_NOTES = {
+  'fortnite':'Fortnite is made by Epic Games, which is private.',
+  'chatgpt':'ChatGPT is made by OpenAI, which is private.',
+  'claude':'Claude is made by Anthropic, which is private.',
+  'm&ms':'M&M\'s is made by Mars, a private family company.','mms':'M&M\'s is made by Mars, a private family company.',
+  'snickers':'Snickers is made by Mars, a private family company.','skittles':'Skittles is made by Mars, a private family company.',
+  'steam':'Steam is run by Valve, which is private.','tiktok':'TikTok\'s owner, ByteDance, is private.'
+};
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+const $=s=>document.querySelector(s);
+const app=$('#app');
+function esc(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function norm(s){ return String(s||'').toLowerCase().replace(/['’.]/g,'').replace(/[-_]/g,' ').replace(/\s+/g,' ').trim(); }
+function gsearch(q){ return 'https://www.google.com/search?q='+encodeURIComponent(q); }
+function fmt(n,d=2){ return (typeof n==='number'&&isFinite(n)) ? n.toLocaleString(undefined,{minimumFractionDigits:d,maximumFractionDigits:d}) : '—'; }
+function usd(n){ return (typeof n==='number'&&isFinite(n)) ? '$'+fmt(n) : '—'; }
+function capFmt(m){ // millions -> readable
+  if(typeof m!=='number'||!isFinite(m)||m<=0) return '—';
+  const v=m*1e6; if(v>=1e12) return '$'+(v/1e12).toFixed(2)+'T'; if(v>=1e9) return '$'+(v/1e9).toFixed(1)+'B'; return '$'+(v/1e6).toFixed(0)+'M';
+}
+function timeAgo(sec){ const d=(Date.now()/1000-sec); if(d<3600) return Math.max(1,Math.round(d/60))+' min ago'; if(d<86400) return Math.round(d/3600)+' hr ago'; const n=Math.round(d/86400); return n+(n===1?' day ago':' days ago'); }
+function exch(e){ e=String(e||''); if(/nasdaq/i.test(e)) return 'NASDAQ'; if(/new york/i.test(e)) return 'NYSE'; if(/otc/i.test(e)) return 'OTC'; return e.replace(/,.*$/,'')||'Stock'; }
+function ymd(d){ return d.toISOString().slice(0,10); }
+function today(){ return new Date().toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}); }
+function cls(n){ return n>0?'up':n<0?'down':'flat'; }
+function sign(n,d=2){ return (n>0?'+':'')+fmt(n,d); }
+
+/* storage */
+let storageOK=true; let memPicks=[];
+try{ localStorage.setItem('__td','1'); localStorage.removeItem('__td'); }catch(e){ storageOK=false; }
+const PK='tickerdesk_picks_v1';
+function loadPicks(){ try{ return JSON.parse(localStorage.getItem(PK)||'[]'); }catch(e){ return memPicks; } }
+function savePicks(l){ memPicks=l; try{ localStorage.setItem(PK,JSON.stringify(l)); }catch(e){} }
+
+/* =========================================================
+   LIVE DATA (Finnhub)
+   ========================================================= */
+function getKey(){ let k=''; try{ k=localStorage.getItem('clubdesk_fhkey')||''; }catch(e){} return k||FINNHUB_KEY; }
+async function fh(path,params){
+  const qs=new URLSearchParams({...params,token:getKey()}).toString();
+  let r; try{ r=await fetch('https://finnhub.io/api/v1/'+path+'?'+qs); }catch(e){ throw new Error('offline'); }
+  if(r.status===429) throw new Error('limit');
+  if(r.status===401||r.status===403){
+    let saved=''; try{ saved=localStorage.getItem('clubdesk_fhkey')||''; }catch(e){}
+    if(saved && FINNHUB_KEY && saved!==FINNHUB_KEY){ try{ localStorage.removeItem('clubdesk_fhkey'); }catch(e){} return fh(path,params); }
+    throw new Error('key');
+  }
+  if(!r.ok) throw new Error('http');
+  return r.json();
+}
+function errText(e){
+  const m=e&&e.message;
+  if(!getKey()) return 'Live data isn\'t set up yet. Ask your teacher to add the data key (⚙ in the top bar).';
+  if(m==='limit') return 'Too many lookups at once — wait a minute and try again.';
+  if(m==='key') return 'The live-data key isn\'t working. Ask your teacher to check ⚙ settings.';
+  if(m==='offline') return 'Couldn\'t reach the live-data service. Check the internet connection — some networks block it.';
+  return 'Live data didn\'t load. Try again in a moment.';
+}
+const cache={};
+async function cached(key,fn,ttl=60000){ const c=cache[key]; if(c&&Date.now()-c.t<ttl) return c.v; const v=await fn(); cache[key]={t:Date.now(),v}; return v; }
+
+/* =========================================================
+   SEARCH (top bar + home hero share this)
+   ========================================================= */
+function brandNote(q){
+  const hit=BRANDS[norm(q)]; if(!hit) return null;
+  if(hit[0]==='private') return {html:`🔒 <b>${esc(q)}</b> is a private company — it has no stock you can buy.${PRIVATE_NOTES[norm(q)]?' '+esc(PRIVATE_NOTES[norm(q)]):''}`};
+  if(hit[0]==='parent') return {html:`🔎 <b>${esc(q)}</b> doesn't have its own stock. It's owned by <b>${esc(hit[1])}</b>:`, sym:hit[2], name:hit[1]};
+  return {sym:hit[2], name:hit[1]};
+}
+function wireSearch(root){
+  const inp=root.querySelector('input'), dd=root.querySelector('.dd');
+  let t=null, items=[], act=-1, seq=0;
+  const close=()=>{ dd.classList.remove('show'); act=-1; };
+  const pick=i=>{ const it=items[i]; if(!it||!it.sym) return; inp.value=''; close(); openQuote(it.sym); };
+  const draw=(note,list,loading,err)=>{
+    items=[]; let h='';
+    if(note){ h+=`<div class="dd-note">${note.html||''}</div>`; }
+    if(note&&note.sym){ items.push({sym:note.sym,name:note.name}); }
+    (list||[]).forEach(r=>{ if(!items.some(x=>x.sym===r.symbol)) items.push({sym:r.symbol,name:r.description}); });
+    h+=items.map((it,i)=>`<div class="dd-item${i===act?' act':''}" data-i="${i}"><span class="sym">${esc(it.sym)}</span><span class="nm">${esc(it.name)}</span></div>`).join('');
+    if(loading) h+=`<div class="dd-note" style="background:#fff">Searching…</div>`;
+    if(err) h+=`<div class="dd-note">${esc(err)}</div>`;
+    if(!loading&&!err&&!items.length&&!(note&&note.html)) h+=`<div class="dd-note" style="background:#fff">No stocks found. It might be private, or owned by a bigger company — <a href="${gsearch('who owns '+inp.value)}" target="_blank" rel="noopener">search who owns it</a>.</div>`;
+    dd.innerHTML=h; dd.classList.toggle('show',!!h);
+    dd.querySelectorAll('.dd-item').forEach(el=>el.onmousedown=e=>{ e.preventDefault(); pick(+el.dataset.i); });
+  };
+  const run=async()=>{
+    const q=inp.value.trim(); if(!q){ close(); return; }
+    const my=++seq, note=brandNote(q);
+    if(note&&!note.html){ draw(null,[{symbol:note.sym,description:note.name}],false); }
+    else draw(note,[],!note);
+    if(note&&note.html) return; // private or parent: no need to search
+    if(note&&note.sym) return;
+    try{
+      const d=await cached('s:'+q.toLowerCase(),()=>fh('search',{q}),300000);
+      if(my!==seq) return;
+      const list=(d.result||[]).filter(r=>/common stock|adr/i.test(r.type||'')&&r.symbol&&(!r.symbol.includes('.')||/^[A-Z]+\.[AB]$/.test(r.symbol))).slice(0,6);
+      draw(note,list,false);
+    }catch(e){ if(my===seq) draw(note,[],false,errText(e)); }
+  };
+  inp.addEventListener('input',()=>{ clearTimeout(t); t=setTimeout(run,300); });
+  inp.addEventListener('focus',()=>{ if(inp.value.trim()) run(); });
+  inp.addEventListener('blur',()=>setTimeout(close,150));
+  inp.addEventListener('keydown',e=>{
+    if(e.key==='ArrowDown'){ e.preventDefault(); act=Math.min(items.length-1,act+1); dd.querySelectorAll('.dd-item').forEach((x,i)=>x.classList.toggle('act',i===act)); }
+    else if(e.key==='ArrowUp'){ e.preventDefault(); act=Math.max(0,act-1); dd.querySelectorAll('.dd-item').forEach((x,i)=>x.classList.toggle('act',i===act)); }
+    else if(e.key==='Enter'){ e.preventDefault();
+      if(items.length) pick(act>=0?act:0);
+      else if(/^[A-Za-z.]{1,6}$/.test(inp.value.trim())){ const s=inp.value.trim().toUpperCase(); inp.value=''; close(); openQuote(s); }
+    }
+    else if(e.key==='Escape') close();
+  });
+}
+
+/* =========================================================
+   READING THE NUMBERS (helper tags + signal)
+   ========================================================= */
+function waveRead(price,lo,hi){
+  if([price,lo,hi].some(x=>typeof x!=='number')||hi<=lo) return null;
+  const pos=Math.max(0,Math.min(1,(price-lo)/(hi-lo)));
+  if(pos<.33) return {pos,tag:'Near low',k:'warn',text:'The price is close to its lowest point of the past year. It could be on sale — or sinking for a reason. Check the headlines to see why.'};
+  if(pos>.67) return {pos,tag:'Near high',k:'mid',text:'The price is close to its highest point of the past year. Lots of investors already like it. Ask: is there still room to grow?'};
+  return {pos,tag:'Middle',k:'mid',text:'The price is in the middle of its range for the past year — not at a bargain, not at a peak.'};
+}
+function peRead(pe){
+  if(pe===null||pe===undefined) return {tag:'No P/E',k:'warn',pts:0,missing:true,text:'No P/E was found. This often means the company isn\'t making a profit — check on Google to be sure.'};
+  if(pe<=0) return {tag:'Losing money',k:'bad',pts:-2,text:'A negative P/E means the company lost money over the past year. That\'s a big warning sign.'};
+  if(pe<15) return {tag:'Bargain',k:'good',pts:1,text:`P/E ${fmt(pe,1)} means you pay about $${fmt(pe,0)} for every $1 the company earns in a year. Under 15 is a cheap price tag.`};
+  if(pe<=30) return {tag:'Normal',k:'mid',pts:0,text:`P/E ${fmt(pe,1)} means you pay about $${fmt(pe,0)} for every $1 of yearly profit. 15–30 is a normal price for a healthy company.`};
+  return {tag:'Pricey',k:'bad',pts:-1,text:`P/E ${fmt(pe,1)} means you pay about $${fmt(pe,0)} for every $1 of yearly profit. Over 30 is pricey — investors expect big growth. If it doesn't happen, the price could fall.`};
+}
+function revRead(g){
+  if(typeof g!=='number') return {tag:'Not found',k:'warn',pts:0,missing:true,text:'Sales growth wasn\'t available. Try a Google search for this company\'s revenue growth.'};
+  if(g>2) return {tag:'Growing',k:'good',pts:1,text:`Sales (revenue) are up ${fmt(g,1)}% compared to a year ago. More customers are buying.`};
+  if(g<-2) return {tag:'Shrinking',k:'bad',pts:-1,text:`Sales are down ${fmt(Math.abs(g),1)}% compared to a year ago. Is it a temporary dip, or are customers leaving?`};
+  return {tag:'Flat',k:'mid',pts:0,text:`Sales are about the same as a year ago (${sign(g,1)}%). Steady, but not growing.`};
+}
+function signal(q){
+  const pe=peRead(q.pe), rv=revRead(q.rev), wv=waveRead(q.price,q.lo,q.hi);
+  const pts=pe.pts+rv.pts;
+  let s = pts>=1?'buy': pts<=-2?'sell':'hold';
+  if(pe.missing&&rv.missing) s='none';
+  const items=[
+    {ic:pe.k==='good'?'g':pe.k==='bad'?'r':'n', t:`Price tag: <b>${pe.tag}</b>${typeof q.pe==='number'?' (P/E '+fmt(q.pe,1)+')':''}`},
+    {ic:rv.k==='good'?'g':rv.k==='bad'?'r':'n', t:`Sales: <b>${rv.tag}</b>${typeof q.rev==='number'?' ('+sign(q.rev,1)+'% vs last year)':''}`},
+  ];
+  if(wv) items.push({ic:'n', t:`52-week range: <b>${wv.tag}</b> — not scored, but worth a look`});
+  return {s,items};
+}
+const SIG={buy:'BUY',hold:'HOLD',sell:'SELL',none:'N/A'};
+
+/* =========================================================
+   VIEWS
+   ========================================================= */
+let view='home', Q=null;
+function setSub(){
+  $('#subbar').innerHTML = `<span>POPULAR:</span>`+POPULAR.map(([s])=>`<a data-s="${s}">${s}</a>`).join('');
+  $('#subbar').querySelectorAll('a').forEach(a=>a.onclick=()=>openQuote(a.dataset.s));
+}
+function go(v){ view=v; window.scrollTo(0,0); ({home:viewHome,quote:viewQuote,picks:viewPicks,settings:viewSettings}[v]||viewHome)(); }
+
+/* ---------- HOME ---------- */
+function viewHome(){
+  app.innerHTML=`
+  <section class="hero">
+    <div class="small muted" style="font-weight:700;letter-spacing:.5px">STOCK RESEARCH · PRACTICE TOOL</div>
+    <h1>Look up any company. Read the real numbers. Make your call.</h1>
+    <p>Search a company to see its live stock price, key numbers, and latest headlines. Then decide: buy, hold, or sell?</p>
+    <div class="search" id="heroSearch"><span class="mag">🔍</span><input type="text" placeholder="Try Nike, Roblox, or Gatorade" autocomplete="off" spellcheck="false"><div class="dd"></div></div>
+  </section>
+  ${!getKey()?`<div class="alert">⚠ Live data isn't set up yet. Teacher: click ⚙ in the top bar to add the data key.</div>`:''}
+  <h2 class="sec-h">Popular Stocks</h2>
+  <div class="pop" id="pop">${POPULAR.map(([s,n])=>`<div class="pop-item" data-s="${s}"><div class="sym">${s}</div><div class="nm">${esc(n)}</div><div class="px small muted" style="font-weight:600">View quote →</div></div>`).join('')}</div>
+  ${loadPicks().length?`<div style="margin-top:22px"><a href="#" id="seePicks" style="font-weight:700">★ You have ${loadPicks().length} saved pick${loadPicks().length>1?'s':''} →</a></div>`:''}
+  <div class="foot">Practice tool for learning — not financial advice. Prices may be delayed.</div>`;
+  wireSearch($('#heroSearch'));
+  setTimeout(()=>$('#heroSearch input').focus(),30);
+  app.querySelectorAll('.pop-item').forEach(el=>el.onclick=()=>openQuote(el.dataset.s));
+  const sp=$('#seePicks'); if(sp) sp.onclick=e=>{e.preventDefault(); go('picks');};
+
+}
+
+/* ---------- QUOTE ---------- */
+async function openQuote(sym){
+  sym=String(sym).toUpperCase().trim();
+  Q={sym, status:'loading', call:'', why:''};
+  go('quote');
+  const my=Q;
+  if(!getKey()){ my.status='err'; my.err=errText(); if(Q===my) viewQuote(); return; }
+  const [q,p,m,n]=await Promise.allSettled([
+    cached('q:'+sym,()=>fh('quote',{symbol:sym})),
+    cached('p:'+sym,()=>fh('stock/profile2',{symbol:sym}),3600000),
+    cached('m:'+sym,()=>fh('stock/metric',{symbol:sym,metric:'all'}),600000),
+    cached('n:'+sym,()=>{ const to=new Date(), fr=new Date(Date.now()-10*86400000); return fh('company-news',{symbol:sym,from:ymd(fr),to:ymd(to)}); },600000)
+  ]);
+  if(Q!==my) return;
+  if(q.status==='rejected'){ my.status='err'; my.err=errText(q.reason); viewQuote(); return; }
+  const qq=q.value||{};
+  if(!qq.c){ my.status='err'; my.err=`No price found for “${sym}”. Check the ticker symbol, or search by company name.`; viewQuote(); return; }
+  const pp=p.status==='fulfilled'?(p.value||{}):{};
+  const mt=m.status==='fulfilled'?((m.value||{}).metric||{}):{};
+  const nn=n.status==='fulfilled'&&Array.isArray(n.value)?n.value:[];
+  const num=x=>typeof x==='number'&&isFinite(x)?x:null;
+  Object.assign(my,{
+    status:'ok', time:new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}),
+    price:qq.c, d:num(qq.d), dp:num(qq.dp),
+    name:pp.name||sym, logo:pp.logo||'', exch:pp.exchange||'', ind:pp.finnhubIndustry||'', web:pp.weburl||'', country:pp.country||'', ipo:pp.ipo||'', cap:num(pp.marketCapitalization)||num(mt.marketCapitalization), cur:pp.currency||'USD',
+    lo:num(mt['52WeekLow']), hi:num(mt['52WeekHigh']),
+    pe:[mt.peTTM,mt.peBasicExclExtraTTM,mt.peNormalizedAnnual].map(num).find(x=>x!==null) ?? null,
+    rev:[mt.revenueGrowthTTMYoy,mt.revenueGrowthQuarterlyYoy].map(num).find(x=>x!==null) ?? null,
+    news:nn.filter(x=>x.headline&&x.url).sort((a,b)=>b.datetime-a.datetime).slice(0,6)
+  });
+  if(my.lo!==null&&my.price<my.lo) my.lo=my.price;
+  if(my.hi!==null&&my.price>my.hi) my.hi=my.price;
+  viewQuote();
+}
+function viewQuote(){
+  if(!Q){ go('home'); return; }
+  if(Q.status==='loading'){
+    app.innerHTML=`<div class="q-head"><div class="q-logo skel"></div><div class="q-meta"><div class="crumb">${esc(Q.sym)}</div><div class="q-name skel">Loading company name</div></div>
+      <div class="q-price"><div class="px skel">$000.00</div></div></div>
+      <div class="q-grid"><div><div class="card skel" style="height:260px"></div><div class="card skel" style="height:200px"></div></div><div><div class="card skel" style="height:300px"></div></div></div>`;
+    return;
+  }
+  if(Q.status==='err'){
+    app.innerHTML=`<div class="alert red">⚠ ${esc(Q.err)}</div>
+      <p><a class="btn ghost" href="${gsearch(Q.sym+' stock')}" target="_blank" rel="noopener">🔍 Look up ${esc(Q.sym)} on Google</a> <button class="btn ghost" id="retry">Try again</button></p>`;
+    $('#retry').onclick=()=>{ delete cache['q:'+Q.sym]; openQuote(Q.sym); };
+    return;
+  }
+  const wv=waveRead(Q.price,Q.lo,Q.hi), pe=peRead(Q.pe), rv=revRead(Q.rev), sg=signal(Q);
+  const tag=(r,id)=>`<button class="help-tag ${r.k}" data-x="${id}">${r.tag}</button>`;
+  const ex=(r,id)=>`<div class="explain" id="x-${id}">${r.text}</div>`;
+  const web=Q.web?Q.web.replace(/^https?:\/\//,'').replace(/\/$/,''):'';
+  app.innerHTML=`
+  <div class="q-head">
+    <div class="q-logo">${Q.logo?`<img src="${esc(Q.logo)}" alt="" onerror="this.remove()">`:''}${esc(Q.sym.slice(0,4))}</div>
+    <div class="q-meta">
+      <div class="crumb">${esc(exch(Q.exch))} : ${esc(Q.sym)}</div>
+      <h1 class="q-name">${esc(Q.name)}</h1>
+      <div class="q-tags">${Q.ind?`<span class="tag">${esc(Q.ind)}</span>`:''}${Q.country?`<span class="tag">${esc(Q.country)}</span>`:''}</div>
+    </div>
+    <div class="q-price">
+      <div class="px"><small>${Q.cur==='USD'?'$':esc(Q.cur)+' '}</small>${fmt(Q.price)}</div>
+      ${Q.d!==null?`<div class="chg ${cls(Q.d)}">${Q.d>0?'▲':Q.d<0?'▼':''} ${sign(Q.d)} (${sign(Q.dp)}%) today</div>`:''}
+      <div class="asof">Live price · fetched ${esc(Q.time)} · may be delayed</div>
+    </div>
+  </div>
+
+  <div class="q-grid">
+    <div>
+      <section class="card">
+        <h2 class="sec-h">Key Data</h2>
+        <table class="kd">
+          <tr><td class="k">52-Week Range</td><td class="v">
+            ${wv?`${tag(wv,'wv')}<div class="range"><div class="range-bar"><div class="range-dot" style="left:${(wv.pos*100).toFixed(1)}%"></div></div><div class="range-lab"><span>${usd(Q.lo)}</span><span>${usd(Q.hi)}</span></div></div>${ex(wv,'wv')}`:'—'}
+          </td></tr>
+          <tr><td class="k">P/E Ratio <span class="muted small">(price ÷ yearly profit per share)</span></td><td class="v">${typeof Q.pe==='number'?fmt(Q.pe,1):'—'} ${tag(pe,'pe')}${ex(pe,'pe')}</td></tr>
+          <tr><td class="k">Sales Growth <span class="muted small">(vs. a year ago)</span></td><td class="v">${typeof Q.rev==='number'?`<span class="chg ${cls(Q.rev)}">${sign(Q.rev,1)}%</span>`:'—'} ${tag(rv,'rv')}${ex(rv,'rv')}</td></tr>
+          <tr><td class="k">Market Cap <span class="muted small">(value of the whole company)</span></td><td class="v">${capFmt(Q.cap)}</td></tr>
+        </table>
+        <div class="small muted" style="margin-top:8px">Tap a colored tag to learn what it means. Want to double-check? <a href="${gsearch(Q.name+' stock')}" target="_blank" rel="noopener">Search Google</a>.</div>
+      </section>
+
+      <section class="card">
+        <h2 class="sec-h">Latest News</h2>
+        ${Q.news.length? Q.news.map(n=>`<a class="news-item" href="${esc(n.url)}" target="_blank" rel="noopener"><div><h4>${esc(n.headline)}</h4><div class="src"><b>${esc(n.source||'News')}</b> · ${timeAgo(n.datetime)}</div></div></a>`).join('')
+          : `<p class="muted">No recent headlines found. <a href="https://www.google.com/search?tbm=nws&q=${encodeURIComponent(Q.name)}" target="_blank" rel="noopener">Search Google News</a>.</p>`}
+      </section>
+    </div>
+
+    <aside>
+      <section class="signal">
+        <div class="sig-top"><div><div class="small muted" style="font-weight:700;letter-spacing:.4px">CLUB DESK SIGNAL</div><div class="small muted">Based on the price tag and sales</div></div>
+          <div class="sig-badge ${sg.s}">${SIG[sg.s]}</div></div>
+        <ul class="sig-list">${sg.items.map(i=>`<li><span class="ic ${i.ic}">${i.ic==='g'?'✓':i.ic==='r'?'✗':'•'}</span><span>${i.t}</span></li>`).join('')}</ul>
+        <div class="small muted">The signal only looks at two numbers. It doesn't read the news — you do.</div>
+      </section>
+
+      <section class="card">
+        <h2 class="sec-h">Your Call</h2>
+        <div class="small muted">Read the numbers and headlines. What would you do?</div>
+        <div class="calls">
+          <button class="call buy" data-c="buy">BUY</button><button class="call hold" data-c="hold">HOLD</button><button class="call sell" data-c="sell">SELL</button>
+        </div>
+        <textarea id="why" placeholder="Why? (one or two sentences — mention a number or a headline)"></textarea>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="savePick">★ Save to My Picks</button></div>
+        <div class="small" id="saveErr" style="color:var(--down);font-weight:600;margin-top:6px"></div>
+        <div class="toast" id="toast"></div>
+      </section>
+
+      <div class="vse"><span>Ready to trade it with virtual money?</span><a class="btn sm" href="${esc(VSE_URL)}" target="_blank" rel="noopener">Open VSE ↗</a></div>
+
+      <section class="card" style="margin-top:20px">
+        <h2 class="sec-h">Company Profile</h2>
+        <div class="prof-row"><span>Industry</span><span>${esc(Q.ind||'—')}</span></div>
+        <div class="prof-row"><span>Exchange</span><span>${esc(Q.exch?exch(Q.exch):'—')}</span></div>
+        <div class="prof-row"><span>Country</span><span>${esc(Q.country||'—')}</span></div>
+        <div class="prof-row"><span>Public since</span><span>${esc(Q.ipo?new Date(Q.ipo+'T12:00').getFullYear():'—')}</span></div>
+        <div class="prof-row"><span>Website</span><span>${web?`<a href="${esc(Q.web)}" target="_blank" rel="noopener">${esc(web)}</a>`:'—'}</span></div>
+      </section>
+    </aside>
+  </div>
+  <div class="foot">Data from Finnhub. Practice tool for learning — not financial advice.</div>`;
+
+  app.querySelectorAll('.help-tag').forEach(b=>b.onclick=()=>$('#x-'+b.dataset.x).classList.toggle('show'));
+  app.querySelectorAll('.call').forEach(b=>b.onclick=()=>{ Q.call=b.dataset.c; app.querySelectorAll('.call').forEach(x=>x.classList.toggle('sel',x===b)); $('#saveErr').textContent=''; });
+  $('#why').oninput=e=>Q.why=e.target.value;
+  $('#savePick').onclick=()=>{
+    if(!Q.call){ $('#saveErr').textContent='Pick BUY, HOLD, or SELL first.'; return; }
+    if(Q.saved){ $('#saveErr').textContent='Already saved. Find it in My Picks.'; return; }
+    Q.saved=true;
+    const rec={id:Date.now(), date:today(), sym:Q.sym, name:Q.name, price:Q.price, call:Q.call, why:Q.why.trim(), signal:sg.s, pe:Q.pe, rev:Q.rev};
+    const l=loadPicks(); l.unshift(rec); savePicks(l);
+    const t=$('#toast'); t.innerHTML=`Saved! You called <b>${SIG[Q.call]}</b> on ${esc(Q.sym)} at ${usd(Q.price)}. <a href="#" id="toPicks">See My Picks →</a>`; t.classList.add('show');
+    $('#toPicks').onclick=e=>{e.preventDefault(); go('picks');};
+    $('#savePick').textContent='✓ Saved';
+  };
+}
+
+/* ---------- MY PICKS ---------- */
+function viewPicks(){
+  const l=loadPicks();
+  app.innerHTML=`
+  <h1 class="q-name" style="margin-bottom:4px">My Picks</h1>
+  <p class="muted" style="margin-top:0">Your saved calls, with today's live price. Were you right?</p>
+  ${!storageOK?`<div class="alert">This browser can't save picks — they'll disappear when you close the page. Use "Copy my picks" to keep them.</div>`:''}
+  ${l.length?`
+  <table class="pk-table">
+    <thead><tr><th>Stock</th><th>Your call</th><th class="num hide-m">Picked</th><th class="num">Price then</th><th class="num">Price now</th><th class="num">Change</th><th>Result</th><th></th></tr></thead>
+    <tbody>${l.map(r=>`<tr data-id="${r.id}">
+      <td><span class="pk-sym" data-s="${esc(r.sym)}">${esc(r.sym)}</span><div class="small muted">${esc(r.name)}</div></td>
+      <td><span class="pill ${r.call}">${SIG[r.call]}</span>${r.why?`<div class="pk-why">${esc(r.why)}</div>`:''}</td>
+      <td class="num hide-m small">${esc(r.date)}</td>
+      <td class="num">${usd(r.price)}</td>
+      <td class="num now"><span class="skel">$000.00</span></td>
+      <td class="num pct">—</td>
+      <td class="res small">—</td>
+      <td><button class="del" title="Delete">✕</button></td></tr>`).join('')}</tbody>
+  </table>
+  <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost sm" id="copyPicks">Copy my picks</button><span class="small muted" id="copyMsg" style="align-self:center"></span></div>`
+  :`<div class="alert">No picks yet. Search a company in the top bar, make your call, and save it.</div>`}`;
+  app.querySelectorAll('.pk-sym').forEach(el=>el.onclick=()=>openQuote(el.dataset.s));
+  app.querySelectorAll('.del').forEach(b=>b.onclick=()=>{
+    if(!b.dataset.arm){ b.dataset.arm='1'; b.textContent='Delete?'; b.style.color='var(--down)'; setTimeout(()=>{ if(b.isConnected){ delete b.dataset.arm; b.textContent='✕'; b.style.color=''; } },3000); return; }
+    const id=+b.closest('tr').dataset.id; savePicks(loadPicks().filter(x=>x.id!==id)); viewPicks();
+  });
+  const cp=$('#copyPicks'); if(cp) cp.onclick=async()=>{
+    const txt=loadPicks().map(r=>`${r.date} — ${r.sym} (${r.name}): ${SIG[r.call]} at ${usd(r.price)}${r.why?' — '+r.why:''}`).join('\n');
+    try{ await navigator.clipboard.writeText(txt); $('#copyMsg').textContent='Copied!'; }catch(e){ $('#copyMsg').textContent='Copy didn\'t work here — take a screenshot instead.'; }
+  };
+  // live prices
+  const syms=[...new Set(l.map(r=>r.sym))];
+  syms.forEach(async s=>{
+    let price=null, err=false;
+    try{ const q=await cached('q:'+s,()=>fh('quote',{symbol:s})); price=q&&q.c?q.c:null; }catch(e){ err=true; }
+    l.filter(r=>r.sym===s).forEach(r=>{
+      const tr=app.querySelector(`tr[data-id="${r.id}"]`); if(!tr) return;
+      if(price===null){ tr.querySelector('.now').textContent='—'; tr.querySelector('.res').textContent=err&&!getKey()?'Live data not set up':'No price'; return; }
+      const ch=(price-r.price)/r.price*100;
+      tr.querySelector('.now').textContent=usd(price);
+      tr.querySelector('.pct').innerHTML=`<span class="chg ${cls(ch)}">${sign(ch,1)}%</span>`;
+      let res;
+      if(Math.abs(ch)<1) res='<span class="muted">Too early to tell</span>';
+      else if(r.call==='buy') res= ch>0?'<b style="color:var(--up)">✓ Good call</b>':'<b style="color:var(--down)">✗ Down so far</b>';
+      else if(r.call==='sell') res= ch<0?'<b style="color:var(--up)">✓ Good call — it dropped</b>':'<b style="color:var(--down)">✗ It went up</b>';
+      else res= `<span class="muted">Held through a ${ch>0?'rise':'drop'}</span>`;
+      tr.querySelector('.res').innerHTML=res;
+    });
+  });
+}
+
+/* ---------- SETTINGS ---------- */
+function viewSettings(){
+  let cur=''; try{ cur=localStorage.getItem('clubdesk_fhkey')||''; }catch(e){}
+  app.innerHTML=`
+  <h1 class="q-name">Teacher Settings</h1>
+  <section class="card" style="max-width:720px;margin-top:14px">
+    <h2 class="sec-h">Live Data Key</h2>
+    ${FINNHUB_KEY?`<div class="toast show" style="margin:0 0 12px">✓ A key is built into this copy, so every student copy works.</div>`:''}
+    <p class="small muted">Paste a free API key from finnhub.io to use on this browser only${FINNHUB_KEY?' (this overrides the built-in key)':''}. To change it for all students, edit <code>FINNHUB_KEY</code> in <code>config.js</code> on GitHub.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><input class="txt" id="keyIn" value="${esc(cur)}" placeholder="paste key" style="flex:1;min-width:220px" autocomplete="off" spellcheck="false"><button class="btn" id="saveKey">Save</button></div>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button class="btn ghost sm" id="testKey">Test with AAPL</button><button class="btn ghost sm" id="clrKey">Remove saved key</button></div>
+    <p id="keyMsg" style="font-weight:700"></p>
+  </section>`;
+  const msg=t=>$('#keyMsg').textContent=t;
+  $('#saveKey').onclick=()=>{ try{ localStorage.setItem('clubdesk_fhkey',$('#keyIn').value.trim()); msg('Saved.'); }catch(e){ msg('This browser can\'t save it.'); } };
+  $('#clrKey').onclick=()=>{ try{ localStorage.removeItem('clubdesk_fhkey'); }catch(e){} $('#keyIn').value=''; msg('Removed.'); };
+  $('#testKey').onclick=async()=>{ const v=$('#keyIn').value.trim(); if(v){ try{ localStorage.setItem('clubdesk_fhkey',v); }catch(e){} }
+    msg('Testing…'); try{ const q=await fh('quote',{symbol:'AAPL'}); msg(q&&q.c?`✓ It works — Apple is at ${usd(q.c)}.`:'Connected, but no price came back.'); }catch(e){ msg('⚠ '+errText(e)); } };
+}
+
+/* =========================================================
+   WIRING
+   ========================================================= */
+$('#logo').onclick=()=>go('home');
+$('#navPicks').onclick=()=>go('picks');
+$('#navSet').onclick=()=>go('settings');
+$('#navVSE').href=VSE_URL;
+wireSearch($('#topSearch'));
+setSub();
+go('home');
+</script>
+</body>
+</html>
