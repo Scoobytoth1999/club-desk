@@ -13,7 +13,7 @@ const VSE_URL = 'https://www.marketwatch.com/games';
 
 // "Club Page" button (top bar and next to the VSE button). Use the PUBLISHED Google Sites
 // address so students can open it. Leave as '' to hide the button.
-const CLUB_SITE_URL = 'https://sites.google.com/u/0/d/1-_A-8NGXAtMMXbHHv2QoQRwVk0dUKWzy/preview';
+const CLUB_SITE_URL = 'https://sites.google.com/view/ckfinance/home';
 
 // Popular stocks shown on the home page and in the top strip: ['TICKER', 'Name']
 const POPULAR = [
